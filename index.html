@@ -24,12 +24,23 @@
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
-      ul {
-        list-style: none;
-        padding: 0;
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
       }
-      li {
-        margin: 10px 0;
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #2c3e50;
+        color: #fff;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
       }
       a {
         text-decoration: none;
@@ -42,60 +53,98 @@
       p {
         line-height: 1.6;
       }
+      .region-header {
+        background-color: #4a6a8a;
+        color: #fff;
+        font-size: 1.2em;
+        padding: 10px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>ETS Project Visualizations</h1>
       <p>
-        Welcome to the ETS Project repository. Below is a list of visualizations
-        and analyses available in this repository. Click on any link to view the
-        corresponding HTML file.
+        Research visualisation repository. Below is a table of visualizations
+        and analyses, grouped by region or projects. Click on any visualization
+        name to view the corresponding HTML file.
       </p>
-      <ul>
-        <li>
-          <a href="ETS-CD_CGRE_TS_average_LTS.html"
-            >ETS-CD CGRE TS Average LTS</a
-          >: Visualization of average LTS for CD CGRE TS.
-        </li>
-        <li>
-          <a href="ETS-CGRE_inshore_average_LTS.html"
-            >ETS-CGRE Inshore Average LTS</a
-          >: Average LTS for CGRE inshore data.
-        </li>
-        <li>
-          <a href="ETS-CGRE_outshore_average_LTS.html"
-            >ETS-CGRE Outshore Average LTS</a
-          >: Average LTS for CGRE outshore data.
-        </li>
-        <li>
-          <a href="ETS-HL_LFS_WP_average_LTS.html">ETS-HL LFS WP Average LTS</a
-          >: Average LTS for HL LFS WP data.
-        </li>
-        <li>
-          <a href="ETS-example-basis.html">ETS Example Basis</a>: Example basis
-          visualization.
-        </li>
-        <li>
-          <a href="ETS-gantt_chart.html">ETS Gantt Chart</a>: Project timeline
-          visualization.
-        </li>
-        <li>
-          <a href="ETS-pcnmf-source-activation.html"
-            >ETS PCNMF Source Activation</a
-          >: PCNMF source activation analysis.
-        </li>
-        <li>
-          <a href="ETS-source-specific-spectrogram.html"
-            >ETS Source-Specific Spectrogram</a
-          >: Spectrogram for specific sources.
-        </li>
-        <li>
-          <a href="hk_spatial_1500-20000_spl.html"
-            >HK Spatial Map (1500-20000 SPL)</a
-          >: Spatial map for HK data in the 1500-20000 SPL range.
-        </li>
-      </ul>
+      <table>
+        <tr>
+          <th>Visualization</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <td class="region-header" colspan="2">HK</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="hk_spatial_1500-20000_spl.html"
+              >HK Spatial Map (1500-20000 SPL)</a
+            >
+          </td>
+          <td>Spatial map for HK data in the 1500-20000 SPL range.</td>
+        </tr>
+        <tr>
+          <td class="region-header" colspan="2">Taiwan</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-CD_CGRE_TS_average_LTS.html"
+              >ETS-CD CGRE TS Average LTS</a
+            >
+          </td>
+          <td>Visualization of average LTS for CD CGRE TS.</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-CGRE_inshore_average_LTS.html"
+              >ETS-CGRE Inshore Average LTS</a
+            >
+          </td>
+          <td>Average LTS for CGRE inshore data.</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-CGRE_outshore_average_LTS.html"
+              >ETS-CGRE Outshore Average LTS</a
+            >
+          </td>
+          <td>Average LTS for CGRE outshore data.</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-HL_LFS_WP_average_LTS.html"
+              >ETS-HL LFS WP Average LTS</a
+            >
+          </td>
+          <td>Average LTS for HL LFS WP data.</td>
+        </tr>
+        <tr>
+          <td><a href="ETS-example-basis.html">ETS Example Basis</a></td>
+          <td>Example basis visualization.</td>
+        </tr>
+        <tr>
+          <td><a href="ETS-gantt_chart.html">ETS Gantt Chart</a></td>
+          <td>Project timeline visualization.</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-pcnmf-source-activation.html"
+              >ETS PCNMF Source Activation</a
+            >
+          </td>
+          <td>PCNMF source activation analysis.</td>
+        </tr>
+        <tr>
+          <td>
+            <a href="ETS-source-specific-spectrogram.html"
+              >ETS Source-Specific Spectrogram</a
+            >
+          </td>
+          <td>Spectrogram for specific sources.</td>
+        </tr>
+      </table>
       <p>
         For more details about the project, see the
         <a href="README.md">README</a> or check the
