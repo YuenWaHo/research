@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fourier Transform Visualizer (Dual Waveform)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #0d1117;
+      }
+      .canvas-container {
+        border: 2px solid #28303f;
+        background-color: #010409;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        border-radius: 0.5rem;
+      }
+      .control-label {
+        font-size: 0.8rem;
+        color: #94a3b8;
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px;
+        background: #28303f;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #60a5fa;
+        cursor: pointer;
+        box-shadow: 0 0 2px 0 #3b82f6;
+      }
+      .play-button {
+        transition: all 0.2s;
+        box-shadow: 0 4px #104e8b;
+      }
+      .play-button:active {
+        box-shadow: 0 0 #104e8b;
+        transform: translateY(4px);
+      }
+    </style>
+  </head>
+  <body class="p-4 md:p-8 min-h-screen flex flex-col items-center">
+    <h1
+      class="text-3xl font-extrabold text-blue-400 mb-6 tracking-wider text-center"
+    >
+      Additive Synthesis & Fourier Visualization (Dual Waveform)
+    </h1>
+
+    <!-- Visualization Area -->
+    <div class="w-full max-w-6xl space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Time Domain -->
+        <div class="lg:col-span-2 p-4 canvas-container">
+          <h2 class="text-xl font-semibold text-white mb-2">
+            Time Domain (Combined Waveform)
+          </h2>
+          <canvas id="timeCanvas" class="w-full" height="200"></canvas>
+        </div>
+        <!-- Frequency Domain -->
+        <div class="lg:col-span-1 p-4 canvas-container">
+          <h2 class="text-xl font-semibold text-white mb-2">
+            Frequency Domain (Spectrum)
+          </h2>
+          <canvas id="freqCanvas" class="w-full" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Spectrogram Area -->
+      <div class="p-4 canvas-container">
+        <h2 class="text-xl font-semibold text-white mb-2">
+          Spectrogram (Time-Frequency Evolution)
+        </h2>
+        <canvas id="spectrogramCanvas" class="w-full" height="150"></canvas>
+      </div>
+
+      <!-- Controls Area -->
+      <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+        <h2
+          class="text-2xl font-bold text-white mb-4 border-b border-gray-700 pb-2"
+        >
+          Waveform Controls
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Waveform A Controls -->
+          <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-blue-400">
+            <h3 class="text-lg font-semibold text-blue-300 mb-3">Waveform A</h3>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+              <!-- Control 1A: Fundamental Frequency -->
+              <div class="control-group col-span-2">
+                <label for="freqA" class="control-label block text-blue-300"
+                  >Fundamental Frequency (Hz)</label
+                >
+                <input
+                  type="range"
+                  id="freqA"
+                  min="100"
+                  max="500"
+                  value="220"
+                  step="10"
+                />
+                <span id="freqAValue" class="text-sm text-gray-400"
+                  >220 Hz</span
+                >
+              </div>
+              <!-- Control 2A: 3rd Harmonic -->
+              <div class="control-group">
+                <label for="h3A" class="control-label block"
+                  >3rd Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h3A"
+                  min="0"
+                  max="1"
+                  value="0.3"
+                  step="0.05"
+                />
+                <span id="h3AValue" class="text-sm text-gray-400">0.30</span>
+              </div>
+              <!-- Control 3A: 5th Harmonic -->
+              <div class="control-group">
+                <label for="h5A" class="control-label block"
+                  >5th Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h5A"
+                  min="0"
+                  max="1"
+                  value="0.2"
+                  step="0.05"
+                />
+                <span id="h5AValue" class="text-sm text-gray-400">0.20</span>
+              </div>
+              <!-- Control 4A: 7th Harmonic -->
+              <div class="control-group">
+                <label for="h7A" class="control-label block"
+                  >7th Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h7A"
+                  min="0"
+                  max="1"
+                  value="0.1"
+                  step="0.05"
+                />
+                <span id="h7AValue" class="text-sm text-gray-400">0.10</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Waveform B Controls -->
+          <div class="p-4 bg-gray-700 rounded-lg border-l-4 border-red-400">
+            <h3 class="text-lg font-semibold text-red-300 mb-3">Waveform B</h3>
+            <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+              <!-- Control 1B: Fundamental Frequency -->
+              <div class="control-group col-span-2">
+                <label for="freqB" class="control-label block text-red-300"
+                  >Fundamental Frequency (Hz)</label
+                >
+                <input
+                  type="range"
+                  id="freqB"
+                  min="100"
+                  max="500"
+                  value="330"
+                  step="10"
+                />
+                <span id="freqBValue" class="text-sm text-gray-400"
+                  >330 Hz</span
+                >
+              </div>
+              <!-- Control 2B: 3rd Harmonic -->
+              <div class="control-group">
+                <label for="h3B" class="control-label block"
+                  >3rd Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h3B"
+                  min="0"
+                  max="1"
+                  value="0.0"
+                  step="0.05"
+                />
+                <span id="h3BValue" class="text-sm text-gray-400">0.00</span>
+              </div>
+              <!-- Control 3B: 5th Harmonic -->
+              <div class="control-group">
+                <label for="h5B" class="control-label block"
+                  >5th Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h5B"
+                  min="0"
+                  max="1"
+                  value="0.5"
+                  step="0.05"
+                />
+                <span id="h5BValue" class="text-sm text-gray-400">0.50</span>
+              </div>
+              <!-- Control 4B: 7th Harmonic -->
+              <div class="control-group">
+                <label for="h7B" class="control-label block"
+                  >7th Harmonic Amplitude</label
+                >
+                <input
+                  type="range"
+                  id="h7B"
+                  min="0"
+                  max="1"
+                  value="0.0"
+                  step="0.05"
+                />
+                <span id="h7BValue" class="text-sm text-gray-400">0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Playback Button -->
+        <div class="mt-6 pt-4 border-t border-gray-700 flex justify-center">
+          <button
+            id="playButton"
+            class="play-button px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl active:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            ▶ Play Sound
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- Configuration and Initialization ---
+      const SAMPLE_RATE = 44100; // Standard audio sample rate
+      const LOOP_DURATION = 4; // Audio playback duration for looping (4 seconds)
+      const VISUAL_DURATION = 0.01; // Time in seconds to visualize (10ms)
+      const VISUAL_SAMPLES = Math.floor(SAMPLE_RATE * VISUAL_DURATION);
+      const MAX_AMPLITUDE = 1;
+      const MAX_FREQ = 4000; // Max frequency displayed on charts
+
+      // Web Audio Context (initialized on user interaction)
+      let audioCtx = null;
+      let currentSource = null;
+      let currentGain = null;
+
+      // Get canvas contexts
+      const timeCanvas = document.getElementById("timeCanvas");
+      const freqCanvas = document.getElementById("freqCanvas");
+      const spectrogramCanvas = document.getElementById("spectrogramCanvas");
+
+      const timeCtx = timeCanvas.getContext("2d");
+      const freqCtx = freqCanvas.getContext("2d");
+      const spectrogramCtx = spectrogramCanvas.getContext("2d");
+
+      // Spectrogram buffer - will store frequency data history
+      let spectrogramData = [];
+
+      // Get controls (renamed for clarity A/B)
+      const controls = {
+        freqA: document.getElementById("freqA"),
+        h3A: document.getElementById("h3A"),
+        h5A: document.getElementById("h5A"),
+        h7A: document.getElementById("h7A"),
+        freqB: document.getElementById("freqB"),
+        h3B: document.getElementById("h3B"),
+        h5B: document.getElementById("h5B"),
+        h7B: document.getElementById("h7B"),
+      };
+
+      const displayValues = {
+        freqA: document.getElementById("freqAValue"),
+        h3A: document.getElementById("h3AValue"),
+        h5A: document.getElementById("h5AValue"),
+        h7A: document.getElementById("h7AValue"),
+        freqB: document.getElementById("freqBValue"),
+        h3B: document.getElementById("h3BValue"),
+        h5B: document.getElementById("h5BValue"),
+        h7B: document.getElementById("h7BValue"),
+      };
+
+      const playButton = document.getElementById("playButton");
+
+      // --- Core Waveform Generation and Analysis ---
+
+      /**
+       * Generates a single composite wave based on a fundamental frequency and harmonics.
+       * @param {number} samples - Number of samples to generate.
+       * @param {string} prefix - 'A' or 'B' to select controls.
+       * @returns {Array<number>} An array of sample values for the waveform.
+       */
+      function generateSingleWaveform(samples, prefix) {
+        const F = parseFloat(controls[`freq${prefix}`].value);
+        const H3_AMP = parseFloat(controls[`h3${prefix}`].value);
+        const H5_AMP = parseFloat(controls[`h5${prefix}`].value);
+        const H7_AMP = parseFloat(controls[`h7${prefix}`].value);
+
+        // Calculate total amplitude for normalization
+        const totalAmplitude = 1 + H3_AMP + H5_AMP + H7_AMP;
+
+        const waveform = new Array(samples);
+
+        for (let i = 0; i < samples; i++) {
+          const time = i / SAMPLE_RATE;
+
+          let sample = MAX_AMPLITUDE * Math.sin(2 * Math.PI * F * time); // Fundamental
+          sample += H3_AMP * Math.sin(2 * Math.PI * (3 * F) * time); // 3rd Harmonic
+          sample += H5_AMP * Math.sin(2 * Math.PI * (5 * F) * time); // 5th Harmonic
+          sample += H7_AMP * Math.sin(2 * Math.PI * (7 * F) * time); // 7th Harmonic
+
+          // Normalization
+          waveform[i] = sample / totalAmplitude;
+        }
+        return waveform;
+      }
+
+      /**
+       * Generates the final, combined waveform (A + B).
+       * @param {number} samples - Number of samples to generate.
+       * @returns {Array<number>} The summed waveform.
+       */
+      function generateWaveform(samples) {
+        const waveA = generateSingleWaveform(samples, "A");
+        const waveB = generateSingleWaveform(samples, "B");
+        const combinedWave = new Array(samples);
+
+        // Sum the two waveforms and apply a final normalization factor (0.5)
+        // to keep the combined signal within the [-1, 1] range safely.
+        for (let i = 0; i < samples; i++) {
+          combinedWave[i] = (waveA[i] + waveB[i]) * 0.5;
+        }
+        return combinedWave;
+      }
+
+      /**
+       * Returns the frequency components for a single waveform.
+       * @param {string} prefix - 'A' or 'B' to select controls.
+       * @returns {Array<Array<number>>} An array of [frequency, magnitude] pairs.
+       */
+      function getSpectrumComponents(prefix) {
+        const F = parseFloat(controls[`freq${prefix}`].value);
+        const H3_AMP = parseFloat(controls[`h3${prefix}`].value);
+        const H5_AMP = parseFloat(controls[`h5${prefix}`].value);
+        const H7_AMP = parseFloat(controls[`h7${prefix}`].value);
+
+        const totalAmplitude = 1 + H3_AMP + H5_AMP + H7_AMP;
+        const components = [];
+
+        // Fundamental
+        components.push([F, 1.0 / totalAmplitude]);
+
+        // Harmonics
+        if (H3_AMP > 0.01) components.push([3 * F, H3_AMP / totalAmplitude]);
+        if (H5_AMP > 0.01) components.push([5 * F, H5_AMP / totalAmplitude]);
+        if (H7_AMP > 0.01) components.push([7 * F, H7_AMP / totalAmplitude]);
+
+        // Normalize the overall amplitude contribution by the 0.5 summing factor
+        return components.map(([freq, amp]) => [freq, amp * 0.5]);
+      }
+
+      /**
+       * Combines and processes all frequency components from both waveforms.
+       * @returns {Array<Array<number>>} The full, combined spectrum.
+       */
+      function analyzeSpectrum() {
+        let spectrum = [];
+
+        // Get components from both waveforms
+        spectrum.push(...getSpectrumComponents("A"));
+        spectrum.push(...getSpectrumComponents("B"));
+
+        // Group components by frequency (for potentially overlapping frequencies)
+        const groupedSpectrum = {};
+        spectrum.forEach(([freq, amp]) => {
+          const key = Math.round(freq); // Round to avoid floating point issues when grouping
+          groupedSpectrum[key] = (groupedSpectrum[key] || 0) + amp;
+        });
+
+        // Convert back to array and sort
+        const finalSpectrum = Object.entries(groupedSpectrum).map(
+          ([freq, amp]) => [parseInt(freq), amp]
+        );
+        finalSpectrum.sort((a, b) => a[0] - b[0]);
+
+        return finalSpectrum;
+      }
+
+      // --- Web Audio Playback (Continuous) ---
+
+      function initializeAudioContext() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      function playSound() {
+        initializeAudioContext();
+
+        // 1. Generate the waveform samples for the full loop duration
+        const audioSamples = generateWaveform(
+          Math.floor(SAMPLE_RATE * LOOP_DURATION)
+        );
+
+        // 2. Create AudioBuffer
+        const buffer = audioCtx.createBuffer(
+          1,
+          audioSamples.length,
+          SAMPLE_RATE
+        );
+        buffer.getChannelData(0).set(audioSamples);
+
+        // 3. Create a source node and gain node
+        currentSource = audioCtx.createBufferSource();
+        currentGain = audioCtx.createGain();
+
+        currentSource.buffer = buffer;
+        currentSource.loop = true; // Set looping
+
+        // Connect nodes: Source -> Gain -> Destination
+        currentSource.connect(currentGain);
+        currentGain.connect(audioCtx.destination);
+
+        // 4. Start playing
+        currentSource.start(0);
+
+        // Update button state
+        playButton.textContent = "◼ Stop Sound";
+        playButton.classList.add(
+          "bg-red-600",
+          "hover:bg-red-700",
+          "active:bg-red-800"
+        );
+        playButton.classList.remove(
+          "bg-blue-600",
+          "hover:bg-blue-700",
+          "active:bg-blue-800"
+        );
+      }
+
+      function stopSound() {
+        if (currentSource) {
+          // Use exponential decay to avoid click/pop when stopping abruptly
+          currentGain.gain.exponentialRampToValueAtTime(
+            0.00001,
+            audioCtx.currentTime + 0.1
+          );
+          currentSource.stop(audioCtx.currentTime + 0.1); // Stop slightly after the ramp ends
+
+          currentSource = null;
+          currentGain = null;
+        }
+
+        // Update button state
+        playButton.textContent = "▶ Play Sound";
+        playButton.classList.add(
+          "bg-blue-600",
+          "hover:bg-blue-700",
+          "active:bg-blue-800"
+        );
+        playButton.classList.remove(
+          "bg-red-600",
+          "hover:bg-red-700",
+          "active:bg-red-800"
+        );
+      }
+
+      function handlePlaybackToggle() {
+        if (currentSource) {
+          stopSound();
+        } else {
+          playSound();
+        }
+      }
+
+      // --- Drawing Functions (No change here, they use the refactored analyzeSpectrum and generateWaveform) ---
+
+      function drawTimeDomain(waveform) {
+        const width = (timeCanvas.width = timeCanvas.offsetWidth);
+        const height = timeCanvas.height;
+        const midY = height / 2;
+
+        timeCtx.clearRect(0, 0, width, height);
+        timeCtx.fillStyle = "#010409";
+        timeCtx.fillRect(0, 0, width, height);
+
+        timeCtx.strokeStyle = "#28303f";
+        timeCtx.lineWidth = 1;
+        timeCtx.beginPath();
+        timeCtx.moveTo(0, midY);
+        timeCtx.lineTo(width, midY);
+        timeCtx.stroke();
+
+        timeCtx.strokeStyle = "#60a5fa";
+        timeCtx.lineWidth = 2;
+        timeCtx.beginPath();
+
+        for (let i = 0; i < waveform.length; i++) {
+          const x = i * (width / waveform.length);
+          const y = midY - waveform[i] * midY * 0.9;
+
+          if (i === 0) {
+            timeCtx.moveTo(x, y);
+          } else {
+            timeCtx.lineTo(x, y);
+          }
+        }
+        timeCtx.stroke();
+      }
+
+      function drawFrequencyDomain(spectrum) {
+        const width = (freqCanvas.width = freqCanvas.offsetWidth);
+        const height = freqCanvas.height;
+
+        freqCtx.clearRect(0, 0, width, height);
+        freqCtx.fillStyle = "#010409";
+        freqCtx.fillRect(0, 0, width, height);
+
+        freqCtx.strokeStyle = "#28303f";
+        freqCtx.lineWidth = 1;
+        freqCtx.beginPath();
+        freqCtx.moveTo(0, height);
+        freqCtx.lineTo(width, height);
+        freqCtx.stroke();
+
+        freqCtx.font = "10px Inter";
+        freqCtx.fillStyle = "#94a3b8";
+        freqCtx.fillText("0 Hz", 0, height - 2);
+        freqCtx.fillText(`${MAX_FREQ} Hz`, width - 50, height - 2);
+
+        spectrum.forEach(([freq, amp]) => {
+          if (freq > MAX_FREQ) return;
+
+          const x = (freq / MAX_FREQ) * width;
+          const barHeight = amp * height * 0.95;
+          const y = height - barHeight;
+
+          const gradient = freqCtx.createLinearGradient(x, height, x + 10, y);
+          gradient.addColorStop(0, "rgba(252, 165, 165, 0.7)");
+          gradient.addColorStop(1, "rgba(96, 165, 250, 1.0)");
+
+          freqCtx.fillStyle = gradient;
+          freqCtx.fillRect(x - 5, y, 10, barHeight);
+        });
+      }
+
+      function drawSpectrogram(spectrum) {
+        const width = (spectrogramCanvas.width = spectrogramCanvas.offsetWidth);
+        const height = spectrogramCanvas.height;
+
+        const slice = new Array(height).fill(0);
+
+        spectrum.forEach(([freq, amp]) => {
+          if (freq < MAX_FREQ && amp > 0.005) {
+            const y = height - Math.floor((freq / MAX_FREQ) * height);
+            if (y >= 0 && y < height) {
+              slice[y] = Math.min(amp * 255 * 5, 255);
+            }
+          }
+        });
+
+        spectrogramData.push(slice);
+        while (spectrogramData.length > width) {
+          spectrogramData.shift();
+        }
+
+        spectrogramCtx.clearRect(0, 0, width, height);
+        spectrogramCtx.fillStyle = "#010409";
+        spectrogramCtx.fillRect(0, 0, width, height);
+
+        spectrogramData.forEach((slice, x) => {
+          for (let y = 0; y < height; y++) {
+            const intensity = slice[y];
+            if (intensity > 0) {
+              const normalizedY = (height - y) / height;
+
+              const r = Math.floor(100 + 155 * normalizedY);
+              const g = Math.floor(50 + 200 * normalizedY * (intensity / 255));
+              const b = Math.floor(
+                50 + 100 * (1 - normalizedY) * (intensity / 255)
+              );
+
+              spectrogramCtx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+              spectrogramCtx.fillRect(x, y, 1, 1);
+            }
+          }
+        });
+      }
+
+      // --- Main Update Loop ---
+
+      function updateVisualization() {
+        // 1. Update displayed values
+        for (const key in controls) {
+          const value = parseFloat(controls[key].value);
+          displayValues[key].textContent = key.startsWith("freq")
+            ? `${value} Hz`
+            : value.toFixed(2);
+        }
+
+        // 2. Generate and analyze
+        const waveform = generateWaveform(VISUAL_SAMPLES);
+        const spectrum = analyzeSpectrum();
+
+        // 3. Draw
+        drawTimeDomain(waveform);
+        drawFrequencyDomain(spectrum);
+        drawSpectrogram(spectrum);
+
+        // If sound is playing, update the buffer to reflect real-time changes
+        if (currentSource) {
+          const LOOP_SAMPLES = Math.floor(SAMPLE_RATE * LOOP_DURATION);
+          const newAudioSamples = generateWaveform(LOOP_SAMPLES);
+
+          // Stop the old source gently
+          currentGain.gain.setValueAtTime(
+            currentGain.gain.value,
+            audioCtx.currentTime
+          );
+          currentGain.gain.exponentialRampToValueAtTime(
+            0.00001,
+            audioCtx.currentTime + 0.05
+          );
+          currentSource.stop(audioCtx.currentTime + 0.05);
+
+          // Create and start the new buffer
+          const newBuffer = audioCtx.createBuffer(1, LOOP_SAMPLES, SAMPLE_RATE);
+          newBuffer.getChannelData(0).set(newAudioSamples);
+
+          const newSource = audioCtx.createBufferSource();
+          newSource.buffer = newBuffer;
+          newSource.loop = true;
+
+          newSource.connect(currentGain);
+          currentGain.connect(audioCtx.destination);
+
+          currentGain.gain.setValueAtTime(0.00001, audioCtx.currentTime + 0.05);
+          currentGain.gain.exponentialRampToValueAtTime(
+            1,
+            audioCtx.currentTime + 0.2
+          ); // Fade back in
+
+          newSource.start(audioCtx.currentTime + 0.05);
+          currentSource = newSource; // Replace the global source handle
+        }
+      }
+
+      // --- Event Listeners and Initial Load ---
+
+      let animationFrameId;
+      function animate() {
+        // Only perform continuous updates for visualization
+        const waveform = generateWaveform(VISUAL_SAMPLES);
+        const spectrum = analyzeSpectrum();
+
+        drawTimeDomain(waveform);
+        drawFrequencyDomain(spectrum);
+        drawSpectrogram(spectrum);
+
+        animationFrameId = requestAnimationFrame(animate);
+      }
+
+      function init() {
+        // Set canvas sizes to fit the container width
+        timeCanvas.width = timeCanvas.offsetWidth;
+        freqCanvas.width = freqCanvas.offsetWidth;
+        spectrogramCanvas.width = spectrogramCanvas.offsetWidth;
+
+        // Bind controls to redraw. Note: When audio is playing,
+        // the updateVisualization function is called which stops/restarts audio.
+        for (const key in controls) {
+          controls[key].addEventListener("input", updateVisualization);
+        }
+
+        // Bind play button to the toggle handler
+        playButton.addEventListener("click", handlePlaybackToggle);
+
+        // Start the visualization animation loop (does not affect audio state)
+        animate();
+      }
+
+      window.onload = init;
+      window.addEventListener("resize", () => {
+        init();
+      });
+    </script>
+  </body>
+</html>
